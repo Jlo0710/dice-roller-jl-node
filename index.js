@@ -8,7 +8,7 @@ var dt = require('./date-time');
 
 const port = process.env.PORT || 3000
 const majorVersion = 1
-const minorVersion = 3
+const minorVersion = 4
 
 // Use Express to publish static HTML, CSS, and JavaScript files that run in the browser. 
 app.use(express.static(__dirname + '/static'))
@@ -32,6 +32,24 @@ app.get('/api/ping', (request, response) => {
 	console.log('Calling "/api/ping"')
 	response.type('text/plain')
 	response.send('ping response')
+})
+
+// Return one random integer between min and max (inclusive) as plain text.
+// Example: /api/random?min=1&max=6
+app.get('/api/random', (request, response) => {
+	console.log('Calling "/api/random"')
+	const inputs = url.parse(request.url, true).query
+	const min = inputs.min === undefined ? 1 : parseInt(inputs.min)
+	const max = inputs.max === undefined ? 6 : parseInt(inputs.max)
+
+	response.type('text/plain')
+	if (Number.isNaN(min) || Number.isNaN(max) || min > max) {
+		response.status(400)
+		response.send('400 - min and max must be integers with min <= max')
+		return
+	}
+	const value = Math.floor(Math.random() * (max - min + 1)) + min
+	response.send(value.toString())
 })
 
 // Return the value of 2 plus 2.
